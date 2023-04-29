@@ -1,6 +1,6 @@
 {
   "name": "fpipes",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "FPipes is a utility library that provides a way to chain synchronous and asynchronous functions in a readable manner. It simplifies the flow of data through a series of functions, making your code more readable and maintainable.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

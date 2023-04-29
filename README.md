@@ -110,3 +110,7 @@ const result = await F.pipe(5)
 
 console.log(result) // 20
 ```
+
+## License
+
+MIT License. See the [LICENSE](./LICENSE) file for details.
