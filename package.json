@@ -1,0 +1,33 @@
+{
+  "name": "fpipes",
+  "version": "1.0.0",
+  "description": "FPipes is a utility library that provides a way to chain synchronous and asynchronous functions in a readable manner. It simplifies the flow of data through a series of functions, making your code more readable and maintainable.",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsc -b -w",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "functional",
+    "pipe",
+    "pipeline",
+    "composition",
+    "flow",
+    "chain",
+    "async",
+    "promises",
+    "typescript",
+    "utility"
+  ],
+  "author": "Skya Tura <antonio@skyatura.com.br>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/skyatura/fpipes.git"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
+}
