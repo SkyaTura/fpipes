@@ -1,8 +1,8 @@
-# FPipes (Functional Pipe)
+# FPipes (Functional Pipes)
 
 > FPipes is a utility library that provides a way to chain synchronous and asynchronous functions in a readable manner. It simplifies the flow of data through a series of functions, making your code more readable and maintainable.
 
-This is heavily inspired on TC39 Pipe Operator proposal, and may be deprecated in the future if it0 gets approved
+This is heavily inspired on TC39 Pipe Operator proposal, and may be deprecated in the future if it gets approved
 
 ## Table of Contents
 
@@ -26,20 +26,20 @@ npm install --save fpipes
 
 ### Basic Usage
 
-To start a pipe, use the `F.start()` function:
+To start a pipe, use the `F.pipe()` function:
 
 ```typescript
 import { F } from "fpipes"
 
 const initialValue = 42
 
-const pipe = F.start(initialValue)
+const pipe = F.pipe(initialValue)
 ```
 
-To retrieve the final value from a pipe, use the `end()` method:
+To retrieve the final value from a pipe, use the `value()` method:
 
 ```typescript
-const result = pipe.end()
+const result = pipe.value()
 console.log(result) // 42
 ```
 
@@ -53,10 +53,10 @@ import { F } from "fpipes"
 const double = (value: number) => value * 2
 const addTen = (value: number) => value + 10
 
-const result = F.start(5)
+const result = F.pipe(5)
   .pipe(double)
   .pipe(addTen)
-  .end()
+  .value()
 
 console.log(result) // 20
 ```
@@ -70,9 +70,9 @@ import { F } from "fpipes"
 
 const asyncDouble = async (value: number) => value * 2
 
-const result = await F.start(5)
+const result = await F.pipe(5)
   .pipe(asyncDouble)
-  .end()
+  .value()
 
 console.log(result) // 10
 ```
@@ -87,10 +87,10 @@ import { F } from "fpipes"
 const asyncDouble = async (value: number) => value * 2
 const asyncAddTen = async (value: number) => value + 10
 
-const result = await F.start(5)
+const result = await F.pipe(5)
   .pipe(asyncDouble) // The result of this function is a promise.
   .pipe(asyncAddTen) // This function receives the resolved value of the previous promise.
-  .end() // The final value of the pipe is also a promise.
+  .value() // The final value of the pipe is also a promise.
 
 console.log(result) // 20
 ```
@@ -103,14 +103,10 @@ import { F } from "fpipes"
 const double = (value: number) => value * 2
 const asyncAddTen = async (value: number) => value + 10
 
-const result = await F.start(5)
+const result = await F.pipe(5)
   .pipe(double) // This function returns a value.
   .pipe(asyncAddTen) // This function returns a promise, so the whole chain is treated as a promise from this point on.
-  .end() // The final value of the pipe is a promise.
+  .value() // The final value of the pipe is a promise.
 
 console.log(result) // 20
 ```
-
-## License
-
-MIT License. See the [LICENSE](./LICENSE) file for details.

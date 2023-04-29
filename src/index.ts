@@ -4,76 +4,75 @@
  */
 export class F {
   /**
-   * Starts a new pipe with the given value.
-   * 
-   * @param {T} value - The initial value to be piped.
-   * @returns {F.Pipe<T>} A new pipe instance.
+   * Creates a new pipe with an initial value.
+   * @param initialValue - The initial value of the pipe.
+   * @returns An object with methods for chaining pipe operations.
    */
-  static start<T>(value: T): F.Pipe<T> {
-    return {
-      /**
-       * @returns {T} The final value of the pipe.
-       */
-      end: () => value,
-      /**
-       * Chains a new function to the pipe.
-       * If the function returns a promise, the whole pipe chain will be treated as a promise.
-       * 
-       * @param {M} method - The function to be chained.
-       * @returns {F.Pipe<ReturnType<M>>} A new pipe instance.
-       */
-      pipe: <M extends (value: T) => any>(method: M) => {
-        const result = method(value)
-        return (
-          typeof result?.then === 'function'
-            ? F.startPromise(result)
-            : F.start(result)
-        ) as ReturnType<M> extends Promise<any>
-          ? F.PipePromised<ReturnType<M>>
-          : F.Pipe<ReturnType<M>>
-      }
-    }
-  }
+  static pipe = <T>(initialValue: T) => ({
+    /**
+     * Retrieves the current value of the pipe.
+     * @returns The current value in the pipe.
+     */
+    value: () => initialValue,
+
+    /**
+     * Adds a new method to the pipe.
+     * If the method returns a Promise, the chain will be treated as a Promise until the end,
+     * waiting for the Promise to resolve before proceeding with subsequent operations.
+     * @param method - The method to add to the pipe.
+     * @returns A new pipe with the added method.
+     */
+    pipe: <R>(method: F.PipeMethod<T, R>) => F.pipe(F.callMethod(initialValue, method)),
+  })
 
   /**
-   * Starts a new pipe with a promises chained.
-   * 
-   * @param {T} value - The initial value to be piped.
-   * @returns {F.PipePromised<T>} A new pipe instance.
+   * Determines if the given value is a Promise.
+   * @param value - The value to check.
+   * @returns True if the value is a Promise, false otherwise.
    */
-  private static async startPromise<T extends Promise<T>>(value: T) {
-    return {
-      /**
-       * @returns {T} The final value of the pipe.
-       */
-      end: () => value,
-      /**
-       * Chains a new function to the pipe.
-       * 
-       * @param {M} method - The function to be chained.
-       * @returns {F.PipePromised<ReturnType<M>>} A new pipe instance.
-       */
-      pipe: async <M extends ((value: Awaited<T>) => any)>(method: M) => F.startPromise(method(await value))
-    }
-  }
+  private static isPromise = <T extends F.MaybePromise<any>>(value: T) =>
+    (typeof (value as Promise<any>)?.then === 'function') as (T extends Promise<any> ? true : false)
+
+  /**
+   * Calls the provided method with the given value.
+   * Handles synchronous and asynchronous cases.
+   * @param value - The value to pass to the method.
+   * @param method - The method to call with the value.
+   * @returns The result of the method call.
+   */
+  private static callMethod = <T extends F.MaybePromise<any>, R extends F.MaybePromise<any>>(
+    value: T,
+    method: F.PipeMethod<T, R>
+  ) =>
+    (!F.isPromise(value)
+      ? method(value as F.UnwrapPromise<T>)
+      : (value as F.WrapPromise<T>)
+        .then(awaited => method(awaited as F.UnwrapPromise<T>))) as F.IfPromise<T, F.WrapPromise<R>, R>
 }
 
 export namespace F {
-  export type MaybeAwaited<T extends any | Promise<any>> = T extends Promise<infer R> ? R : T
+  /**
+   * Represents a value that may be a Promise.
+   */
+  export type MaybePromise<T> = T | Promise<T>
 
   /**
-   * Pipe chain that returns a promise.
+   * Unwraps a Promise type if the input type is a Promise.
    */
-  export type PipePromised<T extends Promise<T>> = {
-    end: () => Promise<T>
-    pipe: <M extends (value: Awaited<T>) => any>(method: M) => PipePromised<ReturnType<M>>
-  }
+  export type UnwrapPromise<T extends any | Promise<any>> = T extends Promise<infer R> ? R : T
 
   /**
-   * Pipe chain that returns a value.
+   * Wraps a type with a Promise if the input type is not already a Promise.
    */
-  export type Pipe<T> = {
-    end: () => T
-    pipe: <M extends (value: T) => any>(method: M) => ReturnType<M> extends Promise<any> ? PipePromised<ReturnType<M>> : Pipe<ReturnType<M>>
-  }
+  export type WrapPromise<T extends any | Promise<any>> = T extends Promise<any> ? T : Promise<T>
+
+  /**
+   * Conditionally applies the Then type if the input type is a Promise, or the Else type otherwise.
+   */
+  export type IfPromise<T extends MaybePromise<any>, Then, Else> = T extends Promise<any> ? Then : Else
+
+  /**
+   * Represents a method in a pipe that takes a previous value and returns a new value.
+   */
+  export type PipeMethod<T extends MaybePromise<any>, R extends MaybePromise<any>> = (previousValue: UnwrapPromise<T>) => R
 }

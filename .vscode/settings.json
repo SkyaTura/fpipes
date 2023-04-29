@@ -1,0 +1,5 @@
+{
+  "docwriter.style": "JSDoc",
+  "jest.jestCommandLine": "npm run test --",
+  "jest.rootPath": "./src"
+}
